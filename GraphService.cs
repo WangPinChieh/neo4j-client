@@ -1,31 +1,30 @@
 ﻿using Neo4j.Driver;
+using Neo4jClient;
+using Newtonsoft.Json;
 
 namespace neo4j_client;
 
 public class GraphService
 {
-    private IDriver _driver;
+    private GraphClient _client;
 
     public GraphService(string uri, string user, string password)
     {
-        _driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
+        _client = new GraphClient(new Uri(uri), user, password);
     }
 
     public async Task GetPersons()
     {
-        using (var session = _driver.AsyncSession())
-        {
-            var result = await session.ReadTransactionAsync(async tx =>
-            {
-                var persons = await tx.RunAsync("match(p:Person) return p.name as name");
-                return (await persons.ToListAsync()).As<List<IRecord>>();
-            });
-            foreach (var person in result)
-            {
-                Console.WriteLine(person["name"]);
-            }
-        }
-        
-        
+        await _client.ConnectAsync();
+        var result = await _client
+            .Cypher
+            .Match("(p:Person)")
+            .Return(p => p.As<Person>())
+            .ResultsAsync;
     }
+}
+
+public class Person
+{
+    [JsonProperty(PropertyName = "name")] public string Name { get; set; }
 }
