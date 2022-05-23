@@ -22,9 +22,20 @@ public class GraphService
             .Return(p => p.As<Person>())
             .ResultsAsync;
     }
+
+    public async Task CreatePerson()
+    {
+        var person = new Person {Name = "George Chen"};
+        await _client
+            .Cypher
+            .Create("(p:Person $newUser)")
+            .WithParam("newUser", person)
+            .ExecuteWithoutResultsAsync();
+    }
 }
 
 public class Person
 {
-    [JsonProperty(PropertyName = "name")] public string Name { get; set; }
+    [JsonProperty(PropertyName = "name")] 
+    public string Name { get; set; }
 }
