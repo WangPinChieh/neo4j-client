@@ -31,7 +31,30 @@ public class GraphService
             .Create("(p:Person $newUser)")
             .WithParam("newUser", person)
             .ExecuteWithoutResultsAsync();
+    }    
+    public async Task CreatePersonAndActedIn()
+    {
+        var person = new Person {Name = "Joey Chen"};
+        await _client
+            .Cypher
+            .Match("(movie:Movie)")
+            .Where((Movie movie) => movie.Title == "The Matrix Revolutions")
+            .Create("(person:Person $newUser)")
+            .WithParam("newUser", person)
+            .Create("(person)-[:ACTED_IN]->(movie)")
+            .ExecuteWithoutResultsAsync();
     }
+}
+
+public class Movie
+{
+    [JsonProperty(PropertyName = "title")]
+    public string Title { get; set; }
+    [JsonProperty(PropertyName = "released")]
+    public DateTime Released { get; set; }
+    [JsonProperty(PropertyName = "tagline")]
+    public string Tagline { get; set; }
+
 }
 
 public class Person
