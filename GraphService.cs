@@ -25,6 +25,7 @@ public class GraphService
 
     public async Task CreatePerson()
     {
+        await _client.ConnectAsync();
         var person = new Person {Name = "George Chen"};
         await _client
             .Cypher
@@ -34,6 +35,7 @@ public class GraphService
     }    
     public async Task CreatePersonAndActedIn()
     {
+        await _client.ConnectAsync();
         var person = new Person {Name = "Joey Chen"};
         await _client
             .Cypher
@@ -42,6 +44,28 @@ public class GraphService
             .Create("(person:Person $newUser)")
             .WithParam("newUser", person)
             .Create("(person)-[:ACTED_IN]->(movie)")
+            .ExecuteWithoutResultsAsync();
+    }
+
+    public async Task CreatePersonsInBatch()
+    {
+        await _client.ConnectAsync();
+        var persons = new List<Person>
+        {
+            new Person
+            {
+                Name = "ABC"
+            },
+            new Person
+            {
+                Name = "DEF"
+            },
+        };
+        await _client
+            .Cypher
+            .Unwind(persons, "map")
+            .Create("(person:Person)")
+            .Set("person = map")
             .ExecuteWithoutResultsAsync();
     }
 }
